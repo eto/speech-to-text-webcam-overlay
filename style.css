@@ -47,6 +47,10 @@ a:link, a:visited, a:hover, a:active {
 	opacity: 0 !important;
 }
 
+.none {
+	display: none;
+}
+
 .video_bg {
 	position: absolute;
 	width: 100%;
