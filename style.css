@@ -3,10 +3,11 @@ body {
 	background-color: #000;
 	font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
 	color: #fff;
+	margin: 0;
 }
 
 .main {
-	margin: 1.5rem;
+	margin: 0.1rem;
 	width: 960px;
 }
 
@@ -30,7 +31,7 @@ a:link, a:visited, a:hover, a:active {
 	position: relative;
 	width: 960px;
 	height: 540px;
-	margin-bottom: 2rem;
+	margin-bottom: 0.1rem;
 	transition: all 0.3s;
 }
 
@@ -169,7 +170,7 @@ a:link, a:visited, a:hover, a:active {
 	display: inline-block;
     min-width: 20ex;
 	padding: 8px 10px;
-	margin-bottom: 1rem;
+	margin-bottom: 0.1rem;
 	font-size: 14px;
 	letter-spacing: 0.02rem;
     line-height: 100%;
