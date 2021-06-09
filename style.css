@@ -15,12 +15,12 @@ body {
 .log_wrapper {
 	line-height: 150%;
 	color: #999;
-	margin-bottom: 1rem;
+	margin-bottom: 0.1rem;
 }
 
 .help_wrapper {
 	text-align: center;
-	padding-bottom: 2rem;
+	padding-bottom: 0.1rem;
 }
 
 a:link, a:visited, a:hover, a:active {
