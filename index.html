@@ -23,20 +23,6 @@
     <div id="status" class="error">起動中...</div>
     <div id="status_kuromoji_loading" class="hidden"></div>
 
-    <div id="video_wrapper" class="video_wrapper">
-      <video id="result_video" class="video_area" autoplay></video>
-      <div id="video_bg" class="video_bg hidden"></div>
-      <div id="text_overlay_wrapper" class="text_overlay_wrapper full">
-        <div id="text_bg" class="text_bg"></div>
-        <div id="result_text" class="text_area">音声認識が始まるとここに文字が表示されます。マイクとカメラを有効にしてください。</div>
-      </div>
-      <img alt="FullScreen" src="fullscreen.svg" id="FullScreenBtn" class="FullScreenBtn" width="20" height="20" style="display:block">
-    </div>
-
-    <div id="help_on_error" class="help_on_error">
-      カメラやマイクが機能しないとき → ページの再読み込みや，ブラウザの設定を確認してください: <a href="https://support.google.com/chrome/answer/2693767?co=GENIE.Platform%3DDesktop&hl=ja&oco=1" target="_blank">Chrome ヘルプ</a>
-    </div>
-
     <div class="interface_wrapper">
       <div id="log" class="log_wrapper">
         <div class="control_header none">認識結果のログ</div>
@@ -226,6 +212,21 @@
 
       </div>
     </div>
+
+    <div id="video_wrapper" class="video_wrapper">
+      <video id="result_video" class="video_area" autoplay></video>
+      <div id="video_bg" class="video_bg hidden"></div>
+      <div id="text_overlay_wrapper" class="text_overlay_wrapper full">
+        <div id="text_bg" class="text_bg"></div>
+        <div id="result_text" class="text_area">音声認識が始まるとここに文字が表示されます。マイクとカメラを有効にしてください。</div>
+      </div>
+      <img alt="FullScreen" src="fullscreen.svg" id="FullScreenBtn" class="FullScreenBtn" width="20" height="20" style="display:block">
+    </div>
+
+    <div id="help_on_error" class="help_on_error">
+      カメラやマイクが機能しないとき → ページの再読み込みや，ブラウザの設定を確認してください: <a href="https://support.google.com/chrome/answer/2693767?co=GENIE.Platform%3DDesktop&hl=ja&oco=1" target="_blank">Chrome ヘルプ</a>
+    </div>
+
     <div class="help_wrapper">
       <div class="help_text none">
         よくある質問・ソースコード: <a href="https://github.com/1heisuzuki/speech-to-text-webcam-overlay" target="_blank">GitHub</a><br /> 音声認識は <a href="https://developer.mozilla.org/ja/docs/Web/API/Web_Speech_API" target="_blank">Web Speech
