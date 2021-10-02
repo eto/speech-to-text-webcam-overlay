@@ -154,6 +154,7 @@ navigator.mediaDevices.enumerateDevices()
 var flag_speech = 0;
 var recognition;
 var lang = 'ja-JP';
+var last_finished = ''; // 最後に確定した部分。確定部分が瞬時に消えるのを防ぐためにここで定義。
 var textUpdateTimeoutID = 0;
 var textUpdateTimeoutSecond = 30; // 音声認識結果が更新されない場合にクリアするまでの秒数（0以下の場合は自動クリアしない）
 
@@ -186,19 +187,14 @@ function vr_function() {
 
   recognition.onresult = function(event) {
     var results = event.results;
+    var current_transcripts = ''; // resultsが複数ある場合は全て連結する。
+    var need_reset = false;
     for (var i = event.resultIndex; i < results.length; i++) {
       if (results[i].isFinal) {
-        var result_transcript = results[i][0].transcript
+        last_finished = results[i][0].transcript;
         if (lang == 'ja-JP') {
-          result_transcript += '。';
+          last_finished += '。';
         }
-
-        if (document.getElementById('checkbox_hiragana').checked && lang == 'ja-JP') {
-          document.getElementById('result_text').innerHTML = resultToHiragana(result_transcript);
-        } else {
-          document.getElementById('result_text').innerHTML = result_transcript;
-        }
-        setTimeoutForClearText();
 
         if (document.getElementById('checkbox_timestamp').checked) {
           // タイムスタンプ機能
@@ -214,22 +210,28 @@ function vr_function() {
           result_transcript = timestamp + result_transcript
         }
 
-        document.getElementById('result_log').insertAdjacentHTML('beforeend', result_transcript + '\n');
+        document.getElementById('result_log').insertAdjacentHTML('beforeend', last_finished + '\n');
         textAreaHeightSet(document.getElementById('result_log'));
-        vr_function();
+        need_reset = true;
+        setTimeoutForClearText();
         flag_speech = 0;
       } else {
-        var result_transcript = results[i][0].transcript;
-
-        if (document.getElementById('checkbox_hiragana').checked && lang == 'ja-JP') {
-          document.getElementById('result_text').innerHTML = resultToHiragana(result_transcript);
-        } else {
-          document.getElementById('result_text').innerHTML = result_transcript;
-        }
-
+        current_transcripts += results[i][0].transcript;
+        clearTimeoutForClearText();
         flag_speech = 1;
       }
     }
+
+    if (document.getElementById('checkbox_hiragana').checked && lang == 'ja-JP') {
+      document.getElementById('result_text').innerHTML 
+        = [resultToHiragana(last_finished), resultToHiragana(current_transcripts)].join('<br>');
+    } else {
+      document.getElementById('result_text').innerHTML 
+        = [last_finished, current_transcripts].join('<br>');
+    }
+    setTimeoutForClearText();
+
+    if (need_reset) { vr_function(); }
   }
 
   flag_speech = 0;
@@ -263,6 +265,7 @@ function setTimeoutForClearText() {
   textUpdateTimeoutID = setTimeout(
     () => {
       document.getElementById('result_text').innerHTML = "";
+      last_finished = ''; // 前回の確定結果もクリアする。
       textUpdateTimeoutID = 0;
     },
     textUpdateTimeoutSecond * 1000);
@@ -663,6 +666,24 @@ function initConfig() {
       }
     }
   });
+  
+  ['checkbox_controls',
+    'checkbox_log',
+    'checkbox_timestamp',
+    'checkbox_hiragana'
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){
+      if (typeof config[id] !== 'undefined') {
+        el.checked = config[el.id];
+        triggerEvent('input', el);
+      }
+      el.addEventListener('input', function (e) {
+        updateConfig(e.target.id, e.target.checked);
+      });
+    }
+  });
+
   if (typeof config.position !== 'undefined') {
     const el = document.getElementById(config.position);
     el.checked = 'checked';
@@ -671,16 +692,6 @@ function initConfig() {
   if (typeof config.select_font !== 'undefined') {
     select_font.selectedIndex = config.select_font;
     triggerEvent('change', select_font);
-  }
-  if (typeof config.checkbox_timestamp !== 'undefined') {
-    const el = document.getElementById('checkbox_timestamp');
-    el.checked = config.checkbox_timestamp;
-    triggerEvent('input', el);
-  }
-  if (typeof config.checkbox_hiragana !== 'undefined') {
-    const el = document.getElementById('checkbox_hiragana');
-    el.checked = config.checkbox_hiragana;
-    triggerEvent('input', el);
   }
   if (typeof config.select_autoclear_text !== 'undefined') {
     const el = document.getElementById('select_autoclear_text');
@@ -696,12 +707,7 @@ function initConfig() {
   );
   document.querySelector('#select_camera').addEventListener('change', updateConfigValue);
   document.querySelector('#select_font').addEventListener('change', updateConfigValue);
-  document.querySelector('#checkbox_timestamp').addEventListener('input', function(e) {
-    updateConfig(e.target.id, e.target.checked)
-  });
-  document.querySelector('#checkbox_hiragana').addEventListener('input', function(e) {
-    updateConfig(e.target.id, e.target.checked)
-  });
+
   document.querySelector('#select_autoclear_text').addEventListener('change', updateConfigValue);
 }
 
@@ -752,6 +758,7 @@ function initKuromoji(checkbox) {
 
 // 結果をひらがなにする
 function resultToHiragana(text) {
+  if (text == null || text.length === 0) return '';
   if (kuromojiObj == undefined) {
     return text;
   }
