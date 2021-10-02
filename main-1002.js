@@ -439,7 +439,7 @@ window.onload = () => {
 var langs = [
   ['Japanese', ['ja-JP']],
   ['English', ['en-US', 'United States'],
-    ['en-AU', 'Australia'],
+/*    ['en-AU', 'Australia'],
     ['en-CA', 'Canada'],
     ['en-IN', 'India'],
     ['en-KE', 'Kenya'],
@@ -449,9 +449,9 @@ var langs = [
     ['en-NG', 'Nigeria'],
     ['en-ZA', 'South Africa'],
     ['en-PH', 'Philippines'],
-    ['en-GB', 'United Kingdom'],
+    ['en-GB', 'United Kingdom'],*/
   ],
-  ['Afrikaans', ['af-ZA']],
+/*  ['Afrikaans', ['af-ZA']],
   ['አማርኛ', ['am-ET']],
   ['Azərbaycanca', ['az-AZ']],
   ['বাংলা', ['bn-BD', 'বাংলাদেশ'],
@@ -485,9 +485,9 @@ var langs = [
     ['es-VE', 'Venezuela']
   ],
   ['Euskara', ['eu-ES']],
-  ['Filipino', ['fil-PH']],
+  ['Filipino', ['fil-PH']],*/
   ['Français', ['fr-FR']],
-  ['Basa Jawa', ['jv-ID']],
+/*  ['Basa Jawa', ['jv-ID']],
   ['Galego', ['gl-ES']],
   ['ગુજરાતી', ['gu-IN']],
   ['Hrvatski', ['hr-HR']],
@@ -546,7 +546,7 @@ var langs = [
     ['yue-Hant-HK', '粵語 (香港)']
   ],
   ['हिन्दी', ['hi-IN']],
-  ['ภาษาไทย', ['th-TH']]
+  ['ภาษาไทย', ['th-TH']]*/
 ];
 
 for (var i = 0; i < langs.length; i++) {
