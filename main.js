@@ -1,30 +1,96 @@
-// ブラウザ判定
-// 参考: https://qiita.com/sakuraya/items/33f93e19438d0694a91d
-var userAgent = window.navigator.userAgent.toLowerCase();
-var isChrome = 0;
-
-if (userAgent.indexOf('msie') != -1 || userAgent.indexOf('trident') != -1) {
-  // IE
-} else if (userAgent.indexOf('edge') != -1) {
-  // Edge
-} else if (userAgent.indexOf('chrome') != -1) {
-  // Chrome
-  isChrome = 1;
-} else if (userAgent.indexOf('safari') != -1) {
-  // Safari
-} else if (userAgent.indexOf('firefox') != -1) {
-  // Firefox
-} else if (userAgent.indexOf('opera') != -1) {
-  // Opera
-} else {
-  // その他
+// PWA化のためにService Workerを登録
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service_worker.js')
+    .then((registration) => {
+      console.log(`[Main] ServiceWorker registration finished. Scope:${registration.scope}`);
+    })
+    .catch((reason) => {
+      console.log(`[Main] ServiceWorker registratio failed. Reason:${reason}`);
+    });
+  });
 }
 
-if (!isChrome) {
-  alert('Google Chromeでアクセスしてください')
-  document.getElementById('status').innerHTML = "Google Chromeでアクセスしてください";
+const TYPE_BROWSER = 'browser_';
+const TYPE_INAPP = 'inapp_';
+const TYPE_SPECIAL = 'special_';
+const TYPE_UNKNOWN = 'unknown_';
+
+/**
+ * ブラウザを可能な範囲で判別する。
+ * （参考）
+ * https://zenn.dev/kecy/articles/f51851e42c4243
+ * https://qiita.com/nightyknite/items/b2590a69f2e0135756dc
+ * @return {string} 判別結果（基本的な形式は「type_name」。typeは単体ブラウザ（browser）かアプリ内ブラウザ（inapp）。nameはブラウザ名。
+ */
+function detectBrowser() {
+  const ua = window.navigator.userAgent.toLowerCase().trim();
+
+  // 特殊なプラットフォーム
+  if (ua.includes('silk')) return TYPE_SPECIAL + 'silk';
+  if (ua.includes('aftb')) return TYPE_SPECIAL + 'firetv';
+  if (ua.includes('nintendo')) return TYPE_SPECIAL + 'nintendo';
+  if (ua.includes('playstation')) return TYPE_SPECIAL + 'playstation';
+  if (ua.includes('xbox')) return TYPE_SPECIAL + 'xbox';
+
+  // 各種の「独自ブラウザ」
+  if (ua.includes('samsung')) return TYPE_BROWSER + 'Samsung';
+  if (ua.includes('ucbrowser')) return TYPE_BROWSER + 'UC Browser';
+  if (ua.includes('qqbrowser')) return TYPE_BROWSER + 'QQ Browser';
+  if (ua.includes('yabrowser')) return TYPE_BROWSER + 'Yandex';
+  if (ua.includes('whale')) return TYPE_BROWSER + 'Whale';
+  if (ua.includes('puffin')) return TYPE_BROWSER + 'Puffin';
+  if (ua.includes('opr')) return TYPE_BROWSER + 'Opera';
+  if (ua.includes('coc_coc')) return TYPE_BROWSER + 'Cốc Cốc';
+
+  // アプリ内ブラウザ
+  if (ua.includes('yahoo') || ua.includes('yjapp')) return TYPE_INAPP + 'Yahoo';
+  if (ua.includes('fban') || ua.includes('fbios')) return TYPE_INAPP + 'Facebook';
+  if (ua.includes('instagram')) return TYPE_INAPP + 'Instagram';
+  if (ua.includes('line')) return TYPE_INAPP + 'LINE';
+  if (ua.includes('cfnetwork')) return TYPE_INAPP + 'iOS app';
+  if (ua.includes('dalvik')) return TYPE_INAPP + 'Android app';
+  if (ua.includes('wv)')) return TYPE_INAPP + 'Android WebView';
+
+  // 特殊なブラウザ
+  if (ua.includes('crios')) return TYPE_BROWSER + 'Chrome(iOS)';
+  if (ua.includes('fxios')) return TYPE_BROWSER + 'Firefox(iOS)';
+
+  // 一般のブラウザ
+  if (ua.includes('trident') || ua.includes('msie')) return TYPE_BROWSER + 'IE';
+  if (ua.includes('edge')) return TYPE_BROWSER + 'EdgeHTML';
+  if (ua.includes('edg')) return TYPE_BROWSER + 'Edge';
+  if (ua.includes('firefox')) return TYPE_BROWSER + 'Firefox';
+
+  // 一般のブラウザのうち、UserAgentが他で流用されすぎたもの（最後に配置する）
+  if (ua.includes('chrome')) return TYPE_BROWSER + 'Chrome';
+  if (ua.includes('safari')) return TYPE_BROWSER + 'Safari';
+
+  // いずれにも当てはまらない場合
+  return TYPE_UNKNOWN + "unknown";
+}
+
+/**
+ * ブラウザが音声認識をサポートすると自己申告しているか判別する。
+ * 具体的には SpeechRecognition または webkitSpeechRecognition オブジェクトの存在を判定している。
+ * @returns {boolean} ブラウザが音声認識をサポートすると自己申告していればtrue
+ */
+function is_speech_recognition_supported() {
+  return window.SpeechRecognition || window.webkitSpeechRecognition != null;
+}
+
+const browser = detectBrowser();
+const is_inapp = (browser.indexOf(TYPE_INAPP) == 0);
+const isnot_supported = (is_speech_recognition_supported() != true);
+console.log(`Detected Browser : ${browser} / Speech recognition NOT-support : ${isnot_supported}`);
+if (is_inapp || isnot_supported) {
+  const errorMessage = 'Google Chrome や Microsoft Edge のような音声認識対応ブラウザでアクセスしてください。';
+  alert(errorMessage);
+  document.getElementById('status').innerHTML = errorMessage;
   document.getElementById('status').className = "error";
-  exit;
+  // exit;
+} else if (browser.indexOf('Safari') > 0) {
+  alert('Safari は音声認識で問題が起こりやすいので、Google Chrome の使用をおすすめします。');
 }
 
 // Webカメラ
@@ -33,7 +99,7 @@ if (!isChrome) {
 if (typeof navigator.mediaDevices.getUserMedia !== 'function') {
   const err = new Error('getUserMedia()が使用できません');
   alert(`${err.name} ${err.message}`);
-  throw err;
+  // throw err;
 }
 
 const $video = document.getElementById('result_video'); // 映像表示エリア
@@ -105,7 +171,9 @@ function setupCamera(isInit) {
     video: {
       aspectRatio: {
         ideal: 1.7777777778
-      }
+      },
+      width: { ideal: 1280 },
+      height: { ideal: 720 }
     },
     audio: false
   };
@@ -192,9 +260,12 @@ function vr_function() {
     for (var i = event.resultIndex; i < results.length; i++) {
       if (results[i].isFinal) {
         last_finished = results[i][0].transcript;
-        if (lang == 'ja-JP') {
+        const is_end_of_sentence = last_finished.endsWith('。') || last_finished.endsWith('？') || last_finished.endsWith('！');
+        if (lang == 'ja-JP' && is_end_of_sentence != true) {
           last_finished += '。';
         }
+
+        var result_log = last_finished
 
         if (document.getElementById('checkbox_timestamp').checked) {
           // タイムスタンプ機能
@@ -207,10 +278,10 @@ function vr_function() {
           var Sec = ("0" + now.getSeconds()).slice(-2);
 
           var timestamp = Year + '-' + Month + '-' + Date + ' ' + Hour + ':' + Min + ':' + Sec + '&#009;'
-          result_transcript = timestamp + result_transcript
+          result_log = timestamp + result_log
         }
 
-        document.getElementById('result_log').insertAdjacentHTML('beforeend', last_finished + '\n');
+        document.getElementById('result_log').insertAdjacentHTML('beforeend', result_log + '\n');
         textAreaHeightSet(document.getElementById('result_log'));
         need_reset = true;
         setTimeoutForClearText();
@@ -603,14 +674,14 @@ function googleTranslateElementInit() {
 // フォント切替
 // 参考: https://www.google.com/intl/ja/chrome/demos/speech.html
 var fonts_custom = [
-  ['Noto Sans JP', "'Noto Sans JP', sans-serif"],
-  ['BIZ UD ゴシック（Windows 10）', "'BIZ UDゴシック', 'BIZ UDGothic', 'Noto Sans JP', sans-serif"],
-  ['BIZ UD 明朝（Windows 10）', "'BIZ UD明朝', 'BIZ UDMincho', 'Noto Sans JP', sans-serif"],
-  ['游ゴシック', "游ゴシック体, 'Yu Gothic', YuGothic, sans-serif"],
-  ['メイリオ', "'メイリオ', 'Meiryo', 'Noto Sans JP', sans-serif"],
-  ['ポップ体（Windows）', "'HGS創英角ﾎﾟｯﾌﾟ体', 'Noto Sans JP', sans-serif"],
-  ['ゴシック体（ブラウザ標準）', "sans-serif"],
-  ['明朝体（ブラウザ標準）', "serif"]
+  ['Noto Sans JP', "'Noto Sans JP', sans-serif", '500'],
+  ['BIZ UDPゴシック', "'BIZ UDPゴシック', 'BIZ UDPGothic', 'Noto Sans JP', sans-serif", '700'],
+  ['BIZ UDP明朝', "'BIZ UDP明朝', 'BIZ UDPMincho', 'Noto Sans JP', serif", '400'],
+  ['游ゴシック', "游ゴシック体, 'Yu Gothic', YuGothic, sans-serif", 'bold'],
+  ['メイリオ', "'メイリオ', 'Meiryo', 'Noto Sans JP', sans-serif", 'bold'],
+  ['ポップ体（Windows）', "'HGS創英角ﾎﾟｯﾌﾟ体', 'Noto Sans JP', sans-serif", 'bold'],
+  ['ゴシック体（ブラウザ標準）', "sans-serif", 'normal'],
+  ['明朝体（ブラウザ標準）', "serif", 'normal']
 ];
 
 for (var i = 0; i < fonts_custom.length; i++) {
