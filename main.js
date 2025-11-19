@@ -76,21 +76,19 @@ function detectBrowser() {
  * @returns {boolean} ブラウザが音声認識をサポートすると自己申告していればtrue
  */
 function is_speech_recognition_supported() {
-  return window.SpeechRecognition || window.webkitSpeechRecognition != null;
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 }
 
 const browser = detectBrowser();
 const is_inapp = (browser.indexOf(TYPE_INAPP) == 0);
 const isnot_supported = (is_speech_recognition_supported() != true);
 console.log(`Detected Browser : ${browser} / Speech recognition NOT-support : ${isnot_supported}`);
-if (is_inapp || isnot_supported) {
+if (isnot_supported) {
   const errorMessage = 'Google Chrome や Microsoft Edge のような音声認識対応ブラウザでアクセスしてください。';
   alert(errorMessage);
   document.getElementById('status').innerHTML = errorMessage;
   document.getElementById('status').className = "error";
   // exit;
-} else if (browser.indexOf('Safari') > 0) {
-  alert('Safari は音声認識で問題が起こりやすいので、Google Chrome の使用をおすすめします。');
 }
 
 // Webカメラ
@@ -261,7 +259,7 @@ function vr_function() {
       if (results[i].isFinal) {
         last_finished = results[i][0].transcript;
         const is_end_of_sentence = last_finished.endsWith('。') || last_finished.endsWith('？') || last_finished.endsWith('！');
-        if (lang == 'ja-JP' && is_end_of_sentence != true) {
+        if (lang == 'ja-JP' && is_end_of_sentence != true && last_finished.trim() !== '') {
           last_finished += '。';
         }
 
@@ -281,8 +279,10 @@ function vr_function() {
           result_log = timestamp + result_log
         }
 
-        document.getElementById('result_log').insertAdjacentHTML('beforeend', result_log + '\n');
-        textAreaHeightSet(document.getElementById('result_log'));
+        if (result_log.trim() !== '') {
+          document.getElementById('result_log').insertAdjacentHTML('beforeend', result_log + '\n');
+          textAreaHeightSet(document.getElementById('result_log'));
+        }
         need_reset = true;
         setTimeoutForClearText();
         flag_speech = 0;
